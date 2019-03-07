@@ -16,7 +16,9 @@ import com.rm.panzoomcanvas.impl.points.ArrayPointsSource;
 import com.rm.panzoomcanvas.impl.points.PointShapeSymbology;
 import com.rm.panzoomcanvas.layers.LayerTooltip;
 import com.rm.panzoomcanvas.layers.line.LineLayer;
+import com.rm.panzoomcanvas.layers.points.Offset.OffsetBuilder;
 import com.rm.panzoomcanvas.layers.points.PointMarker;
+import com.rm.panzoomcanvas.layers.points.PointsLabel;
 import com.rm.panzoomcanvas.layers.points.PointsLayer;
 import com.rm.panzoomcanvas.projections.MapCanvasSR;
 import com.rm.panzoomcanvas.projections.Projector;
@@ -63,10 +65,11 @@ public class MainApp extends Application {
     ObservableList<Layer> value = mapCanvas.getContent().getLayers().getValue();
     value.add(new VirtualBoxLayer());
     value.add(new CenterLayer("center"));
-    LineLayer lineLayer = this.getLineLayer();
-    value.add(lineLayer);
     PointsLayer pointsLayer = this.getPointsLayer();
     value.add(pointsLayer);
+    LineLayer lineLayer = this.getLineLayer();
+    value.add(lineLayer);
+    
   }
 
   /**
@@ -103,12 +106,21 @@ public class MainApp extends Application {
     symbology.fillColorProperty().setValue(Color.ROSYBROWN);
     symbology.strokeColorProperty().setValue(Color.BLACK);
     symbology.getSelected().fillColorProperty().setValue(Color.RED);
-
+    
     PointsLayer pointsLayer = new PointsLayer("points", symbology, singlePointSource);
     pointsLayer.hoverableProperty().setValue(Boolean.TRUE);
     pointsLayer.selectableProperty().setValue(Boolean.TRUE);
     pointsLayer.setTooltip(new LayerTooltip.Builder()
       .setHeightOffset(54));
+    
+    pointsLayer.labelProperty().setValue(new PointsLabel.Builder<String>()
+      .setOffset(new OffsetBuilder().north(10).east(10).build())
+      .setText((PointMarker<String> marker)-> marker.getUserObject())
+      .setBackgroundColor(Color.BLACK
+      )
+      .setForegroundColor(Color.WHITESMOKE)
+      .build());
+    
     return pointsLayer;
   }
 

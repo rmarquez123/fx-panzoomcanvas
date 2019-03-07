@@ -35,6 +35,23 @@ public final class Point {
   }
   
   /**
+   * 
+   * @param x
+   * @return 
+   */
+  public Point plusX(double x) {
+    return new Point(this.x + x, this.y); 
+  }
+  /**
+   * 
+   * @param x
+   * @return 
+   */
+  public Point plusY(double y) {
+    return new Point(this.x, this.y + y); 
+  }
+  
+  /**
    * {@inheritDoc}
    * <p>
    * OVERRIDE: </p>
@@ -43,6 +60,8 @@ public final class Point {
   public String toString() {
     return "Point{" + "x=" + x + ", y=" + y + '}';
   }
+
+  
   
 
 }

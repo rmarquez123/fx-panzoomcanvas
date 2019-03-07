@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 
@@ -28,11 +30,12 @@ import javafx.scene.canvas.Canvas;
  * @param <T> A user object type.
  */
 public class PointsLayer<T> extends BaseLayer {
-  
+
   private final PointSymbology symbology;
   private final PointsSource<T> source;
   private LayerTooltip tooltip;
   private final LayerHoverSelect<PointMarker<T>, T> hoverSelect;
+  private final Property<PointsLabel> pointsLabelProperty = new SimpleObjectProperty<>();
 
   /**
    *
@@ -53,18 +56,28 @@ public class PointsLayer<T> extends BaseLayer {
       protected List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
         return self.getMouseEvtList(e);
       }
-    }; 
-    this.hoverSelect.selected().addListener((obs, oldVal, change)->{
+    };
+    this.hoverSelect.selected().addListener((obs, oldVal, change) -> {
       this.repaint();
     });
-    
+    this.pointsLabelProperty.addListener((obs, old, change)->{
+      this.repaint();
+    });
+
   }
-  
-  
+
   /**
-   * 
+   *
+   * @return
+   */
+  public Property<PointsLabel> labelProperty() {
+    return this.pointsLabelProperty;
+  }
+
+  /**
+   *
    * @param userObject
-   * @return 
+   * @return
    */
   public PointMarker<T> getMarker(T userObject) {
     PointMarker<T> result = null;
@@ -90,7 +103,7 @@ public class PointsLayer<T> extends BaseLayer {
    * @return
    */
   public ReadOnlyProperty<HoveredMarkers<PointMarker<T>>> hoveredMarkersProperty() {
-    return this.hoverSelect.hovered(); 
+    return this.hoverSelect.hovered();
   }
 
   /**
@@ -119,11 +132,11 @@ public class PointsLayer<T> extends BaseLayer {
   @Override
   protected ScreenEnvelope onGetScreenEnvelope(FxCanvas canvas) {
     VirtualEnvelope virtualEnv = canvas
-            .virtualEnvelopeProperty()
-            .getValue();
+      .virtualEnvelopeProperty()
+      .getValue();
     ScreenEnvelope screenEnv = canvas.screenEnvelopeProperty().getValue();
     ScreenEnvelope result = canvas.getProjector()
-            .projectVirtualToScreen(virtualEnv, screenEnv);
+      .projectVirtualToScreen(virtualEnv, screenEnv);
     return result;
   }
 
@@ -141,6 +154,10 @@ public class PointsLayer<T> extends BaseLayer {
       FxPoint point = marker.getPoint();
       ScreenPoint screenPoint = projector.projectGeoToScreen(point, args.getScreenEnv());
       this.symbology.apply(this, marker, args, screenPoint);
+      PointsLabel label = this.pointsLabelProperty.getValue(); 
+      if (label != null) {
+        label.apply(this, marker, args, screenPoint); 
+      }
     }
   }
 
@@ -154,7 +171,6 @@ public class PointsLayer<T> extends BaseLayer {
     }
     this.tooltip = pointsTooltipBuilder.build(this.hoverSelect);
   }
-  
 
   /**
    *
@@ -180,7 +196,5 @@ public class PointsLayer<T> extends BaseLayer {
     }
     return result;
   }
-
-  
 
 }
