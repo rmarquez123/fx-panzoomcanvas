@@ -5,9 +5,7 @@ import com.rm.panzoomcanvas.LayerMouseEvent;
 import com.rm.panzoomcanvas.core.FxPoint;
 import com.rm.panzoomcanvas.core.ScreenEnvelope;
 import com.rm.panzoomcanvas.core.ScreenPoint;
-import com.rm.panzoomcanvas.core.SpatialRef;
 import com.rm.panzoomcanvas.core.VirtualEnvelope;
-import com.rm.panzoomcanvas.core.VirtualPoint;
 import com.rm.panzoomcanvas.layers.BaseLayer;
 import com.rm.panzoomcanvas.layers.DrawArgs;
 import com.rm.panzoomcanvas.layers.HoveredMarkers;
@@ -180,21 +178,20 @@ public class PointsLayer<T> extends BaseLayer {
   private List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
     double eX = e.mouseEvt.getX();
     double eY = e.mouseEvt.getY();
-    ScreenPoint scrnPt = new ScreenPoint(eX, eY);
-    ScreenEnvelope env = e.screenEnv;
-    VirtualPoint virtual = e.projector.projectScreenToVirtual(scrnPt, env);
+    
+    ScreenPoint mouseScnPt = new ScreenPoint(eX, eY); 
+    ScreenEnvelope screenEnv = e.screenEnv;
     List<PointMarker<T>> result = new ArrayList<>();
+    
     for (int i = 0; i < this.source.getNumPoints(); i++) {
       PointMarker<T> marker = this.source.getFxPoint(i);
-      SpatialRef spatialRef = marker.getPoint().getSpatialRef();
-      FxPoint refPoint = e.projector.projectVirtualToGeo(virtual.asPoint(), spatialRef);
       FxPoint currPoint = marker.getPoint();
-      boolean pointsIntersect = this.source.intersects(refPoint, currPoint);
+      ScreenPoint markerScreenPt = e.projector.projectGeoToScreen(currPoint, screenEnv);
+      boolean pointsIntersect = mouseScnPt.intesects(markerScreenPt, 5); 
       if (pointsIntersect) {
         result.add(marker);
       }
     }
     return result;
   }
-
 }

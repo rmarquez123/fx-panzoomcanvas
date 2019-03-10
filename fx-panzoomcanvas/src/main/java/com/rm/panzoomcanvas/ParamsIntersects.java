@@ -19,7 +19,7 @@ public class ParamsIntersects {
   public final ScreenEnvelope screenEnv;
   private final Map<SpatialRef, FxPoint> geomPoint = new HashMap<>();
 
-  ParamsIntersects(ScreenPoint screenPoint, Projector projector, ScreenEnvelope screenEnv) {
+  public ParamsIntersects(ScreenPoint screenPoint, Projector projector, ScreenEnvelope screenEnv) {
     this.screenPoint = screenPoint;
     this.projector = projector;
     this.screenEnv = screenEnv;

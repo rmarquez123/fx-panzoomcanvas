@@ -2,8 +2,8 @@ package com.rm.panzoomcanvas.impl.points;
 
 import com.rm.panzoomcanvas.ParamsIntersects;
 import com.rm.panzoomcanvas.core.FxPoint;
+import com.rm.panzoomcanvas.core.ScreenPoint;
 import com.rm.panzoomcanvas.core.SpatialRef;
-import com.rm.panzoomcanvas.core.SpatialUtils;
 import com.rm.panzoomcanvas.layers.points.PointMarker;
 import com.rm.panzoomcanvas.layers.points.PointsSource;
 
@@ -40,28 +40,16 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
   @Override
   public final boolean intersects(ParamsIntersects args) {
     boolean result = false;
-    FxPoint geomPoint = args.getGeomPoint(this.spatialRef);
     for (int i = 0; i < this.getNumPoints(); i++) {
-      PointMarker marker = this.getFxPoint(i);
-      FxPoint point = marker.getPoint();
-      result = this.intersects(point, geomPoint);
-      if (result) {
+      PointMarker<T> marker = this.getFxPoint(i);
+      FxPoint currPoint = marker.getPoint();
+      ScreenPoint markerScreenPt = args.projector.projectGeoToScreen(currPoint, args.screenEnv);
+      boolean pointsIntersect = args.screenPoint.intesects(markerScreenPt, 5); 
+      if (pointsIntersect) {
+        result = true;
         break;
       }
     }
-    return result;
-  }
-
-  /**
-   * 
-   * @param point
-   * @param geomPoint
-   * @return 
-   */
-  @Override
-  public boolean intersects(FxPoint point, FxPoint geomPoint) {
-    boolean result;
-    result = SpatialUtils.intersects(point, geomPoint, 0.001);
     return result;
   }
 }
