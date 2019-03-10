@@ -18,6 +18,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -39,7 +40,8 @@ public class FxCanvas extends Canvas {
   private final Property<ScreenPoint> center = new SimpleObjectProperty<>(INITIAL_SCREEN_POINT);
   private final Projector projector;
   private final BooleanProperty scrolling = new SimpleBooleanProperty(false);
-  
+  private Property<StackPane> mapToolsPane = new SimpleObjectProperty<>();
+
   /**
    *
    * @param content
@@ -65,17 +67,17 @@ public class FxCanvas extends Canvas {
     MapBindings.bindLevelScrolling(this);
     MapBindings.bindPanning(this);
     this.content.setVirtualCanvas(this);
+    this.setToolsPane();
+
   }
-  
-  
-  
+
   private void onParentPropertyChanged() {
     Platform.runLater(() -> {
       this.addMouseListeners();
       this.setInitialCenter();
     });
   }
-  
+
   /**
    *
    * @return
@@ -277,16 +279,60 @@ public class FxCanvas extends Canvas {
   }
 
   /**
-   * 
+   *
    * @param marker
-   * @return 
+   * @return
    */
   public boolean isInView(Marker<?> marker) {
     FxEnvelope geometry = marker.getFxEnvelope();
-    ScreenEnvelope value = this.screenEnvelopeProperty.getValue(); 
-    ScreenEnvelope markerScreenEnv = this.projector.projectGeoToScreen(geometry, value); 
-    boolean result = value.contains(markerScreenEnv); 
-    return result; 
+    ScreenEnvelope value = this.screenEnvelopeProperty.getValue();
+    ScreenEnvelope markerScreenEnv = this.projector.projectGeoToScreen(geometry, value);
+    boolean result = value.contains(markerScreenEnv);
+    return result;
+  }
+
+  /**
+   *
+   * @param mapToolsPane
+   */
+  private void setToolsPane() {
+    if (this.getParent() != null) {
+      this.mapToolsPane.setValue(new StackPane());
+      this.setToolsPaneImpl(this.mapToolsPane.getValue());
+    } else {
+      this.parentProperty().addListener((obs, old, change) -> {
+        this.mapToolsPane.setValue(new StackPane());
+        this.setToolsPaneImpl(this.mapToolsPane.getValue());
+      });
+    }
+  }
+
+  /**
+   *
+   * @param mapToolsPane
+   */
+  private void setToolsPaneImpl(StackPane mapToolsPane) {
+    StackPane root = (StackPane) this.getParent();
+    root.getChildren().add(mapToolsPane);
+    root.getChildren().addListener((ListChangeListener.Change<? extends Node> c) -> {
+      Platform.runLater(() -> {
+        mapToolsPane.toFront();
+      });
+    });
+  }
+
+  /**
+   *
+   * @param positionBar
+   */
+  public void addTool(Node positionBar) {
+    if (this.mapToolsPane.getValue() != null) {
+      this.mapToolsPane.getValue().getChildren().add(positionBar);
+    } else {
+      this.mapToolsPane.addListener((obs, old, change) -> {
+        this.mapToolsPane.getValue().getChildren().add(positionBar);
+      });
+    }
   }
 
 }
