@@ -32,6 +32,12 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
     this.buffer = buffer;
   }
 
+  @Override
+  public final SpatialRef getSpatialRef() {
+    return spatialRef;
+  }
+
+  
   /**
    * {@inheritDoc}
    * <p>

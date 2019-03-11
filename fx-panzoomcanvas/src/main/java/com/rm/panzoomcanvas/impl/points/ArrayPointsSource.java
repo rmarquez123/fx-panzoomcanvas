@@ -35,7 +35,8 @@ public final class ArrayPointsSource<T> extends BasePointsSource<T> {
    */
   @Override
   public int getNumPoints() {
-    return this.points.length;
+    int result = this.points.length;
+    return result;
   }
 
   /**
@@ -45,7 +46,8 @@ public final class ArrayPointsSource<T> extends BasePointsSource<T> {
    */
   @Override
   public PointMarker getFxPoint(int i) {
-    return this.points[i];
+    PointMarker result = this.points[i];
+    return result;
   }
 
 }

@@ -1,5 +1,6 @@
 package com.rm.panzoomcanvas.core;
 
+import com.vividsolutions.jts.geom.Envelope;
 import java.util.Objects;
 
 /**
@@ -69,6 +70,17 @@ public class FxEnvelope {
   public final Double getHeight() {
     return this.max.getY() - this.min.getY();
   }
+  
+  /**
+   * 
+   */
+  public static FxEnvelope fromJtsEnvelope(Envelope envelope, SpatialRef spatialRef) {
+    FxPoint min = new FxPoint(envelope.getMinX(), envelope.getMinY(), spatialRef); 
+    FxPoint max = new FxPoint(envelope.getMaxX(), envelope.getMaxY(), spatialRef); 
+    FxEnvelope result = new FxEnvelope(min, max); 
+    return result; 
+  }
+  
   /**
    *
    * @return

@@ -136,7 +136,8 @@ public class FxCanvas extends Canvas {
    */
   public void zoomToLayer(GeometricLayer geometricLayer) {
     FxPoint value = geometricLayer.centerProperty().getValue();
-    this.zoomToVirtualPoint(this.level.getValue().getValue(), value);
+    int levelInt = this.level.getValue().getValue();
+    this.zoomToVirtualPoint(levelInt, value);
   }
 
   /**

@@ -1,10 +1,13 @@
 package com.rm.panzoomcanvas.layers.points;
 
 import com.rm.panzoomcanvas.FxCanvas;
+import com.rm.panzoomcanvas.GeometricLayer;
 import com.rm.panzoomcanvas.LayerMouseEvent;
+import com.rm.panzoomcanvas.core.FxEnvelope;
 import com.rm.panzoomcanvas.core.FxPoint;
 import com.rm.panzoomcanvas.core.ScreenEnvelope;
 import com.rm.panzoomcanvas.core.ScreenPoint;
+import com.rm.panzoomcanvas.core.SpatialRef;
 import com.rm.panzoomcanvas.core.VirtualEnvelope;
 import com.rm.panzoomcanvas.layers.BaseLayer;
 import com.rm.panzoomcanvas.layers.DrawArgs;
@@ -12,11 +15,16 @@ import com.rm.panzoomcanvas.layers.HoveredMarkers;
 import com.rm.panzoomcanvas.layers.LayerHoverSelect;
 import com.rm.panzoomcanvas.layers.LayerTooltip;
 import com.rm.panzoomcanvas.projections.Projector;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -27,13 +35,15 @@ import javafx.scene.canvas.Canvas;
  * @author rmarquez
  * @param <T> A user object type.
  */
-public class PointsLayer<T> extends BaseLayer {
+public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
 
   private final PointSymbology symbology;
   private final PointsSource<T> source;
   private LayerTooltip tooltip;
   private final LayerHoverSelect<PointMarker<T>, T> hoverSelect;
   private final Property<PointsLabel> pointsLabelProperty = new SimpleObjectProperty<>();
+  private ReadOnlyObjectWrapper<FxPoint> centerProperty = new ReadOnlyObjectWrapper<>();
+  private ReadOnlyObjectWrapper<FxEnvelope> envelopeProperty = new ReadOnlyObjectWrapper<>();
 
   /**
    *
@@ -60,8 +70,29 @@ public class PointsLayer<T> extends BaseLayer {
     });
     this.pointsLabelProperty.addListener((obs, old, change)->{
       this.repaint();
-    });
-
+    }); 
+    
+    Geometry ref = null;
+    for (int i = 0; i < this.source.getNumPoints(); i++) {
+      PointMarker<T> marker = this.source.getFxPoint(i);
+      Geometry point = marker.getJtsGeometry().getEnvelope(); 
+      if (ref == null) {
+        ref = point;
+      } else {
+        ref = ref.union(point); 
+      }
+    }
+    if (ref != null) {
+      Point centroid = ref.getCentroid(); 
+      SpatialRef spatialRef = this.source.getSpatialRef();
+      FxPoint center = new FxPoint(centroid.getX(), centroid.getY(), spatialRef);
+      this.centerProperty.setValue(center);
+      Envelope envelope = ref.getEnvelopeInternal();
+      FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
+      this.envelopeProperty.setValue(fxEnvelope);
+      
+    }
+    
   }
 
   /**
@@ -194,4 +225,24 @@ public class PointsLayer<T> extends BaseLayer {
     }
     return result;
   }
+  
+  /**
+   * 
+   * @return 
+   */
+  @Override
+  public ReadOnlyObjectProperty<FxPoint> centerProperty() {
+    return this.centerProperty.getReadOnlyProperty();
+  }
+  
+  /**
+   * 
+   * @return 
+   */
+  @Override
+  public ReadOnlyObjectProperty<FxEnvelope> envelopeProperty() {
+    return this.envelopeProperty.getReadOnlyProperty();
+  }
+  
+  
 }
