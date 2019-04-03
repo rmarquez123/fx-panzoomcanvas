@@ -68,31 +68,35 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
     this.hoverSelect.selected().addListener((obs, oldVal, change) -> {
       this.repaint();
     });
-    this.pointsLabelProperty.addListener((obs, old, change)->{
+    this.pointsLabelProperty.addListener((obs, old, change) -> {
       this.repaint();
-    }); 
-    
+    });
+
     Geometry ref = null;
     for (int i = 0; i < this.source.getNumPoints(); i++) {
       PointMarker<T> marker = this.source.getFxPoint(i);
-      Geometry point = marker.getJtsGeometry().getEnvelope(); 
+      Geometry point = marker.getJtsGeometry().getEnvelope();
       if (ref == null) {
         ref = point;
       } else {
-        ref = ref.union(point); 
+        ref = ref.union(point);
       }
     }
     if (ref != null) {
-      Point centroid = ref.getCentroid(); 
-      SpatialRef spatialRef = this.source.getSpatialRef();
-      FxPoint center = new FxPoint(centroid.getX(), centroid.getY(), spatialRef);
-      this.centerProperty.setValue(center);
-      Envelope envelope = ref.getEnvelopeInternal();
-      FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
-      this.envelopeProperty.setValue(fxEnvelope);
-      
+      Point centroid = ref.getCentroid();
+      if (!centroid.isEmpty()) {
+        SpatialRef spatialRef = this.source.getSpatialRef();
+        FxPoint center = new FxPoint(centroid.getX(), centroid.getY(), spatialRef);
+        this.centerProperty.setValue(center);
+        Envelope envelope = ref.getEnvelopeInternal();
+        FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
+        this.envelopeProperty.setValue(fxEnvelope);
+      } else {
+        throw new RuntimeException("Reference point has an 'empty' centroid."); 
+      }
+
     }
-    
+
   }
 
   /**
@@ -183,9 +187,19 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
       FxPoint point = marker.getPoint();
       ScreenPoint screenPoint = projector.projectGeoToScreen(point, args.getScreenEnv());
       this.symbology.apply(this, marker, args, screenPoint);
-      PointsLabel label = this.pointsLabelProperty.getValue(); 
+      PointsLabel label = this.pointsLabelProperty.getValue();
       if (label != null) {
-        label.apply(this, marker, args, screenPoint); 
+        label.apply(this, marker, args, screenPoint);
+      }
+    }
+    List<PointMarker<T>> selected = this.selectedMarkersProperty().getValue();
+    for (PointMarker<T> marker : selected) {
+      FxPoint point = marker.getPoint();
+      ScreenPoint screenPoint = projector.projectGeoToScreen(point, args.getScreenEnv());
+      this.symbology.apply(this, marker, args, screenPoint);
+      PointsLabel label = this.pointsLabelProperty.getValue();
+      if (label != null) {
+        label.apply(this, marker, args, screenPoint);
       }
     }
   }
@@ -209,40 +223,39 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
   private List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
     double eX = e.mouseEvt.getX();
     double eY = e.mouseEvt.getY();
-    
-    ScreenPoint mouseScnPt = new ScreenPoint(eX, eY); 
+
+    ScreenPoint mouseScnPt = new ScreenPoint(eX, eY);
     ScreenEnvelope screenEnv = e.screenEnv;
     List<PointMarker<T>> result = new ArrayList<>();
-    
+
     for (int i = 0; i < this.source.getNumPoints(); i++) {
       PointMarker<T> marker = this.source.getFxPoint(i);
       FxPoint currPoint = marker.getPoint();
       ScreenPoint markerScreenPt = e.projector.projectGeoToScreen(currPoint, screenEnv);
-      boolean pointsIntersect = mouseScnPt.intesects(markerScreenPt, 5); 
+      boolean pointsIntersect = mouseScnPt.intesects(markerScreenPt, 5);
       if (pointsIntersect) {
         result.add(marker);
       }
     }
     return result;
   }
-  
+
   /**
-   * 
-   * @return 
+   *
+   * @return
    */
   @Override
   public ReadOnlyObjectProperty<FxPoint> centerProperty() {
     return this.centerProperty.getReadOnlyProperty();
   }
-  
+
   /**
-   * 
-   * @return 
+   *
+   * @return
    */
   @Override
   public ReadOnlyObjectProperty<FxEnvelope> envelopeProperty() {
     return this.envelopeProperty.getReadOnlyProperty();
   }
-  
-  
+
 }
