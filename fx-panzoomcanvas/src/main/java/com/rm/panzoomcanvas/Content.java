@@ -56,7 +56,7 @@ public class Content {
   /**
    *
    */
-  private void redraw() {
+  public void redraw() {
     if (Platform.isFxApplicationThread()) {
       if (this.canvas != null) {
         this.layers.stream().forEach((l) -> l.redraw(this.canvas));

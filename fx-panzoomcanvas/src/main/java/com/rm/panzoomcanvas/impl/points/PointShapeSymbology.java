@@ -33,7 +33,7 @@ public class PointShapeSymbology implements PointSymbology {
   private final PointShapeSymbology hovered;
   private final Map<String, Property<?>> properties = new HashMap<>();
   private final Predicate<Pair<PointsLayer<?>, PointMarker<?>>> hoverableOrSelectablePredicate;
-
+  
   /**
    *
    */

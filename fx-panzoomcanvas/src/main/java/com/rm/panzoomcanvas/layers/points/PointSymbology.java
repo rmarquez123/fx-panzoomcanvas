@@ -8,7 +8,8 @@ import com.rm.panzoomcanvas.layers.DrawArgs;
  * @author rmarquez
  */
 public interface PointSymbology {
-
+  ;
+  
   /**
    *
    * @param layer

@@ -19,6 +19,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -266,6 +267,7 @@ public class FxCanvas extends Canvas {
   void addLayerCanvas(Node layerCanvas) {
     ((StackPane) this.getParent()).getChildren().add(layerCanvas);
     StackPane.setAlignment(layerCanvas, Pos.TOP_LEFT);
+    this.mapToolsPane.getValue().toFront();
   }
 
   /**
@@ -275,7 +277,8 @@ public class FxCanvas extends Canvas {
   void removeLayerCanvas(Node layerCanvas) {
     Parent p = this.getParent();
     if (p != null) {
-      ((StackPane) p).getChildren().remove(layerCanvas);
+      ObservableList<Node> children = ((StackPane) p).getChildren();
+      children.remove(layerCanvas);
     }
   }
 
@@ -316,22 +319,21 @@ public class FxCanvas extends Canvas {
     StackPane root = (StackPane) this.getParent();
     root.getChildren().add(mapToolsPane);
     root.getChildren().addListener((ListChangeListener.Change<? extends Node> c) -> {
-      Platform.runLater(() -> {
-        mapToolsPane.toFront();
-      });
+      
+
     });
   }
 
   /**
    *
-   * @param positionBar
+   * @param mapToolNode
    */
-  public void addTool(Node positionBar) {
+  public void addTool(Node mapToolNode) {
     if (this.mapToolsPane.getValue() != null) {
-      this.mapToolsPane.getValue().getChildren().add(positionBar);
+      this.mapToolsPane.getValue().getChildren().add(mapToolNode);
     } else {
       this.mapToolsPane.addListener((obs, old, change) -> {
-        this.mapToolsPane.getValue().getChildren().add(positionBar);
+        this.mapToolsPane.getValue().getChildren().add(mapToolNode);
       });
     }
   }

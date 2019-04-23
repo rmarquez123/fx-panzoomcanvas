@@ -94,9 +94,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
       } else {
         throw new RuntimeException("Reference point has an 'empty' centroid."); 
       }
-
     }
-
   }
 
   /**
