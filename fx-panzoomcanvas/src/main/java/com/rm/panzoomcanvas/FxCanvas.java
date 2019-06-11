@@ -41,7 +41,7 @@ public class FxCanvas extends Canvas {
   private final Property<ScreenPoint> center = new SimpleObjectProperty<>(INITIAL_SCREEN_POINT);
   private final Projector projector;
   private final BooleanProperty scrolling = new SimpleBooleanProperty(false);
-  private Property<StackPane> mapToolsPane = new SimpleObjectProperty<>();
+  private Property<StackPane> mapToolsPaneProperty = new SimpleObjectProperty<>();
 
   /**
    *
@@ -267,7 +267,10 @@ public class FxCanvas extends Canvas {
   void addLayerCanvas(Node layerCanvas) {
     ((StackPane) this.getParent()).getChildren().add(layerCanvas);
     StackPane.setAlignment(layerCanvas, Pos.TOP_LEFT);
-    this.mapToolsPane.getValue().toFront();
+    StackPane pane = this.mapToolsPaneProperty.getValue();
+    if (pane != null) {
+      pane.toFront();
+    }
   }
 
   /**
@@ -301,12 +304,12 @@ public class FxCanvas extends Canvas {
    */
   private void setToolsPane() {
     if (this.getParent() != null) {
-      this.mapToolsPane.setValue(new StackPane());
-      this.setToolsPaneImpl(this.mapToolsPane.getValue());
+      this.mapToolsPaneProperty.setValue(new StackPane());
+      this.setToolsPaneImpl(this.mapToolsPaneProperty.getValue());
     } else {
       this.parentProperty().addListener((obs, old, change) -> {
-        this.mapToolsPane.setValue(new StackPane());
-        this.setToolsPaneImpl(this.mapToolsPane.getValue());
+        this.mapToolsPaneProperty.setValue(new StackPane());
+        this.setToolsPaneImpl(this.mapToolsPaneProperty.getValue());
       });
     }
   }
@@ -319,7 +322,6 @@ public class FxCanvas extends Canvas {
     StackPane root = (StackPane) this.getParent();
     root.getChildren().add(mapToolsPane);
     root.getChildren().addListener((ListChangeListener.Change<? extends Node> c) -> {
-      
 
     });
   }
@@ -329,11 +331,11 @@ public class FxCanvas extends Canvas {
    * @param mapToolNode
    */
   public void addTool(Node mapToolNode) {
-    if (this.mapToolsPane.getValue() != null) {
-      this.mapToolsPane.getValue().getChildren().add(mapToolNode);
+    if (this.mapToolsPaneProperty.getValue() != null) {
+      this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
     } else {
-      this.mapToolsPane.addListener((obs, old, change) -> {
-        this.mapToolsPane.getValue().getChildren().add(mapToolNode);
+      this.mapToolsPaneProperty.addListener((obs, old, change) -> {
+        this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
       });
     }
   }

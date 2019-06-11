@@ -1,5 +1,6 @@
 package com.rm.panzoomcanvas.layers;
 
+import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
@@ -48,17 +49,19 @@ public final class LayerTooltip {
    *
    * @param hovered
    */
-  private void onHovered(HoveredMarkers<Marker<?>> hovered) {
+  private synchronized void onHovered(HoveredMarkers<Marker<?>> hovered) {
     if (holder.tooltip != null) {
       holder.tooltip.hide();
+    } else {
+      Node node = this.host.getNode();
+      holder.tooltip = new Tooltip();
+      Tooltip.install(node, holder.tooltip);
     }
-    List<Marker<?>> markers = hovered.markers;
+    List<Marker<?>> markers = new ArrayList<>(hovered.markers);
     Node node = this.host.getNode();
     for (Marker<?> pointMarker : markers) {
       if (node != null) {
         String label = pointMarker.labelProperty().getValue();
-        holder.tooltip = new Tooltip(label);
-        Tooltip.install(node, holder.tooltip);
         holder.tooltip.textProperty().setValue(label);
         holder.tooltip.getScene().cursorProperty().bind(node.getParent().cursorProperty());
         double x = hovered.mouseEvent.mouseEvt.getScreenX();

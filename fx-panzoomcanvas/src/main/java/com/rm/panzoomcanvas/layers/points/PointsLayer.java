@@ -19,6 +19,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.ListProperty;
@@ -62,7 +63,15 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
     this.hoverSelect = new LayerHoverSelect<PointMarker<T>, T>(this) {
       @Override
       protected List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
-        return self.getMouseEvtList(e);
+        List<PointMarker<T>> fullList = self.getMouseEvtList(e);
+        PointMarker<T> closest = getClosesPoint(e, fullList);
+        List<PointMarker<T>> result;
+        if (closest == null) {
+          result = new ArrayList<>();
+        } else {
+          result = Arrays.asList(closest);
+        }
+        return result;
       }
     };
     this.hoverSelect.selected().addListener((obs, oldVal, change) -> {
@@ -92,7 +101,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
         FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
         this.envelopeProperty.setValue(fxEnvelope);
       } else {
-        throw new RuntimeException("Reference point has an 'empty' centroid."); 
+        throw new RuntimeException("Reference point has an 'empty' centroid.");
       }
     }
   }
@@ -191,15 +200,21 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
       }
     }
     List<PointMarker<T>> selected = this.selectedMarkersProperty().getValue();
-    for (PointMarker<T> marker : selected) {
-      FxPoint point = marker.getPoint();
-      ScreenPoint screenPoint = projector.projectGeoToScreen(point, args.getScreenEnv());
-      this.symbology.apply(this, marker, args, screenPoint);
-      PointsLabel label = this.pointsLabelProperty.getValue();
-      if (label != null) {
-        label.apply(this, marker, args, screenPoint);
+    if (selected != null) {
+      for (PointMarker<T> marker : selected) {
+        if (marker == null) {
+          continue;
+        }
+        FxPoint point = marker.getPoint();
+        ScreenPoint screenPoint = projector.projectGeoToScreen(point, args.getScreenEnv());
+        this.symbology.apply(this, marker, args, screenPoint);
+        PointsLabel label = this.pointsLabelProperty.getValue();
+        if (label != null) {
+          label.apply(this, marker, args, screenPoint);
+        }
       }
     }
+
   }
 
   /**
@@ -211,6 +226,28 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
       this.tooltip.destroy();
     }
     this.tooltip = pointsTooltipBuilder.build(this.hoverSelect);
+  }
+
+  /**
+   *
+   * @param markers
+   * @return
+   */
+  private PointMarker<T> getClosesPoint(LayerMouseEvent e, List<PointMarker<T>> markers) {
+    PointMarker<T> result = null;
+    double minDistance = Double.NaN;
+    ScreenPoint mouseScnPt = new ScreenPoint(e.mouseEvt.getX(), e.mouseEvt.getY());
+    ScreenEnvelope screenEnv = e.screenEnv;
+    for (PointMarker<T> marker : markers) {
+      FxPoint currPoint = marker.getPoint();
+      ScreenPoint markerScreenPt = e.projector.projectGeoToScreen(currPoint, screenEnv);
+      double d = mouseScnPt.distance(markerScreenPt);
+      if (Double.isNaN(minDistance) || d < minDistance) {
+        minDistance = d;
+        result = marker;
+      }
+    }
+    return result;
   }
 
   /**

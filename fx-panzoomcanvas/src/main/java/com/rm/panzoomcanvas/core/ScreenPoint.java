@@ -40,6 +40,15 @@ public class ScreenPoint {
   public ScreenPoint difference(ScreenPoint other) {
     return new ScreenPoint(this.x - other.x, this.y - other.y);
   }
+  
+  /**
+   * 
+   * @param other
+   * @return 
+   */
+  public double distance(ScreenPoint other) {
+    return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2)); 
+  }
 
   /**
    *
@@ -79,6 +88,8 @@ public class ScreenPoint {
   public String toString() {
     return "ScreenPoint{" + "x=" + x + ", y=" + y + '}';
   }
+
+  
 
 
 

@@ -76,7 +76,6 @@ public class Content {
    * @param c
    */
   private void onLayerItemsChanged(ListChangeListener.Change<? extends Layer> c) {
-
     while (c.next()) {
       if (c.wasAdded()) {
         c.getAddedSubList().stream().forEach((layer) -> {
@@ -92,7 +91,9 @@ public class Content {
           });
         });
       } else if (c.wasRemoved()) {
-        c.getAddedSubList().stream().forEach((t) -> t.purge(this.canvas));
+        c.getRemoved().stream()
+          .forEach((t) -> t.purge(this.canvas));
+        
       }
     }
   }
