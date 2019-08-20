@@ -19,7 +19,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.ListProperty;
@@ -28,13 +27,15 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 
 /**
  *
  * @author rmarquez
- * @param <T> A user object type.
+ * @param <T> The type of the user object.
  */
 public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
 
@@ -43,8 +44,8 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
   private LayerTooltip tooltip;
   private final LayerHoverSelect<PointMarker<T>, T> hoverSelect;
   private final Property<PointsLabel> pointsLabelProperty = new SimpleObjectProperty<>();
-  private ReadOnlyObjectWrapper<FxPoint> centerProperty = new ReadOnlyObjectWrapper<>();
-  private ReadOnlyObjectWrapper<FxEnvelope> envelopeProperty = new ReadOnlyObjectWrapper<>();
+  private final ReadOnlyObjectWrapper<FxPoint> centerProperty = new ReadOnlyObjectWrapper<>();
+  private final ReadOnlyObjectWrapper<FxEnvelope> envelopeProperty = new ReadOnlyObjectWrapper<>();
 
   /**
    *
@@ -54,36 +55,62 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
    */
   public PointsLayer(String name, PointSymbology symbology, PointsSource<T> source) {
     super(name, source);
+    Objects.requireNonNull(symbology, "Symbology cannot be null");
     this.source = source;
-    if (symbology == null) {
-      throw new NullPointerException("Symbology cannot be null");
-    }
     this.symbology = symbology;
-    PointsLayer<T> self = this;
-    this.hoverSelect = new LayerHoverSelect<PointMarker<T>, T>(this) {
-      @Override
-      protected List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
-        List<PointMarker<T>> fullList = self.getMouseEvtList(e);
-        PointMarker<T> closest = getClosesPoint(e, fullList);
-        List<PointMarker<T>> result;
-        if (closest == null) {
-          result = new ArrayList<>();
-        } else {
-          result = Arrays.asList(closest);
-        }
-        return result;
+    this.hoverSelect = new PointLayerHoverSelect(this);
+    this.hoverSelect.selected().addListener((obs, oldVal, change) -> this.repaint());
+    this.pointsLabelProperty.addListener((obs, old, change) -> this.repaint());
+    this.source.pointMarkersProperty().addListener((ListChangeListener.Change<? extends PointMarker<T>> change)->{
+      if (change.next()) {
+        this.setEnvelopeAndCenter();
       }
-    };
-    this.hoverSelect.selected().addListener((obs, oldVal, change) -> {
-      this.repaint();
     });
-    this.pointsLabelProperty.addListener((obs, old, change) -> {
-      this.repaint();
-    });
+  }
 
+  
+  /**
+   * 
+   * @return 
+   */
+  public PointsSource<T> getSource() {
+    return source;
+  }
+  
+
+  /**
+   *
+   * @throws RuntimeException
+   */
+  private void setEnvelopeAndCenter() throws RuntimeException {
+    Geometry ref = this.getReferenceGeometryFromSource();
+    if (ref != null) {
+      Point centroid = ref.getCentroid();
+      if (!centroid.isEmpty()) {
+        SpatialRef spatialRef = this.source.getSpatialRef();
+        Envelope envelope = ref.getEnvelopeInternal();
+        FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
+        this.envelopeProperty.setValue(fxEnvelope);
+
+        FxPoint center = new FxPoint(centroid.getX(), centroid.getY(), spatialRef);
+        this.centerProperty.setValue(center);
+      } else {
+        throw new RuntimeException("Reference point has an 'empty' centroid.");
+      }
+    } else {
+      this.centerProperty.set(null);
+      this.envelopeProperty.set(null);
+    }
+  }
+
+  /**
+   *
+   * @return
+   */
+  private Geometry getReferenceGeometryFromSource() {
     Geometry ref = null;
-    for (int i = 0; i < this.source.getNumPoints(); i++) {
-      PointMarker<T> marker = this.source.getFxPoint(i);
+    List<PointMarker<T>> copy = new ArrayList<>(this.source.pointMarkersProperty());
+    for (PointMarker<T> marker : copy) {
       Geometry point = marker.getJtsGeometry().getEnvelope();
       if (ref == null) {
         ref = point;
@@ -91,19 +118,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
         ref = ref.union(point);
       }
     }
-    if (ref != null) {
-      Point centroid = ref.getCentroid();
-      if (!centroid.isEmpty()) {
-        SpatialRef spatialRef = this.source.getSpatialRef();
-        FxPoint center = new FxPoint(centroid.getX(), centroid.getY(), spatialRef);
-        this.centerProperty.setValue(center);
-        Envelope envelope = ref.getEnvelopeInternal();
-        FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
-        this.envelopeProperty.setValue(fxEnvelope);
-      } else {
-        throw new RuntimeException("Reference point has an 'empty' centroid.");
-      }
-    }
+    return ref;
   }
 
   /**
@@ -121,8 +136,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
    */
   public PointMarker<T> getMarker(T userObject) {
     PointMarker<T> result = null;
-    for (int i = 0; i < this.source.getNumPoints(); i++) {
-      PointMarker<T> p = this.source.getFxPoint(i);
+    for (PointMarker<T> p : this.source.pointMarkersProperty()) {
       if (Objects.equals(p.getUserObject(), userObject)) {
         result = p;
         break;
@@ -188,9 +202,8 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
   @Override
   protected void onDraw(DrawArgs args) {
     Projector projector = args.getCanvas().getProjector();
-    int numPoints = this.source.getNumPoints();
-    for (int i = 0; i < numPoints; i++) {
-      PointMarker marker = this.source.getFxPoint(i);
+    ObservableList<PointMarker<T>> copy = this.source.pointMarkersProperty();
+    for (PointMarker<T> marker : copy) {
       FxPoint point = marker.getPoint();
       ScreenPoint screenPoint = projector.projectGeoToScreen(point, args.getScreenEnv());
       this.symbology.apply(this, marker, args, screenPoint);
@@ -233,7 +246,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
    * @param markers
    * @return
    */
-  private PointMarker<T> getClosesPoint(LayerMouseEvent e, List<PointMarker<T>> markers) {
+  PointMarker<T> getClosesPoint(LayerMouseEvent e, List<PointMarker<T>> markers) {
     PointMarker<T> result = null;
     double minDistance = Double.NaN;
     ScreenPoint mouseScnPt = new ScreenPoint(e.mouseEvt.getX(), e.mouseEvt.getY());
@@ -255,16 +268,14 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
    * @param e
    * @return
    */
-  private List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
+  List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
     double eX = e.mouseEvt.getX();
     double eY = e.mouseEvt.getY();
-
+    
     ScreenPoint mouseScnPt = new ScreenPoint(eX, eY);
     ScreenEnvelope screenEnv = e.screenEnv;
     List<PointMarker<T>> result = new ArrayList<>();
-
-    for (int i = 0; i < this.source.getNumPoints(); i++) {
-      PointMarker<T> marker = this.source.getFxPoint(i);
+    for (PointMarker<T> marker : this.source.pointMarkersProperty()) {
       FxPoint currPoint = marker.getPoint();
       ScreenPoint markerScreenPt = e.projector.projectGeoToScreen(currPoint, screenEnv);
       boolean pointsIntersect = mouseScnPt.intesects(markerScreenPt, 5);

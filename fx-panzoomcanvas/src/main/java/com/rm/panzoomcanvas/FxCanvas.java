@@ -281,7 +281,12 @@ public class FxCanvas extends Canvas {
     Parent p = this.getParent();
     if (p != null) {
       ObservableList<Node> children = ((StackPane) p).getChildren();
-      children.remove(layerCanvas);
+      try {
+        children.remove(layerCanvas);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+
     }
   }
 

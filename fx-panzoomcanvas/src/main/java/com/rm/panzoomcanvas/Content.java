@@ -4,6 +4,7 @@ import com.rm.panzoomcanvas.core.ScreenEnvelope;
 import com.rm.panzoomcanvas.core.ScreenPoint;
 import com.rm.panzoomcanvas.core.VirtualEnvelope;
 import com.rm.panzoomcanvas.projections.Projector;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +60,14 @@ public class Content {
   public void redraw() {
     if (Platform.isFxApplicationThread()) {
       if (this.canvas != null) {
-        this.layers.stream().forEach((l) -> l.redraw(this.canvas));
+        new ArrayList<>(this.layers).stream()
+          .forEach((l) -> l.redraw(this.canvas));
       }
     } else {
       Platform.runLater(() -> {
         if (this.canvas != null) {
-          this.layers.stream().forEach((l) -> l.redraw(this.canvas));
+          new ArrayList<>(this.layers).stream()
+            .forEach((l) -> l.redraw(this.canvas));
         }
       });
     }

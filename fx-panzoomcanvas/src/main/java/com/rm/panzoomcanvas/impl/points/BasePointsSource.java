@@ -6,6 +6,8 @@ import com.rm.panzoomcanvas.core.ScreenPoint;
 import com.rm.panzoomcanvas.core.SpatialRef;
 import com.rm.panzoomcanvas.layers.points.PointMarker;
 import com.rm.panzoomcanvas.layers.points.PointsSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -46,8 +48,8 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
   @Override
   public final boolean intersects(ParamsIntersects args) {
     boolean result = false;
-    for (int i = 0; i < this.getNumPoints(); i++) {
-      PointMarker<T> marker = this.getFxPoint(i);
+    List<PointMarker<T>> copy = new ArrayList<>(this.pointMarkersProperty());
+    for (PointMarker<T> marker : copy) {
       FxPoint currPoint = marker.getPoint();
       ScreenPoint markerScreenPt = args.projector.projectGeoToScreen(currPoint, args.screenEnv);
       boolean pointsIntersect = args.screenPoint.intesects(markerScreenPt, 5); 

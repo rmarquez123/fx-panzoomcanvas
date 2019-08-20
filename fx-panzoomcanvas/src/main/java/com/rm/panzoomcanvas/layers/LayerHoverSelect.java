@@ -1,6 +1,7 @@
 package com.rm.panzoomcanvas.layers;
 
 import com.rm.panzoomcanvas.LayerMouseEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -23,9 +24,12 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
   private final ListProperty<TMarker> selected = new SimpleListProperty<>(FXCollections.emptyObservableList());
   private final Property<HoveredMarkers<TMarker>> hovered = new SimpleObjectProperty<>();
   private final LayerCursorHelper<TObj> cursorHelper;
-  private final BaseLayer host;
+  public final BaseLayer host;
   
-
+  /**
+   * 
+   * @param host 
+   */
   public LayerHoverSelect(BaseLayer host) {
     this.host = host;
     this.cursorHelper = new LayerCursorHelper<>(this);
@@ -72,7 +76,7 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
    * OVERRIDE: </p>
    */
   public void onMouseClicked(LayerMouseEvent e) {
-    List<TMarker> newVal = this.getMouseEvtList(e);
+    List<TMarker> newVal = new ArrayList<>(this.getMouseEvtList(e));
     newVal.removeIf((TMarker t) -> selected.contains(t)); 
     this.selected.setValue(FXCollections.observableArrayList(newVal));
   }
@@ -83,7 +87,7 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
    * OVERRIDE: </p>
    */
   public void onMouseHovered(LayerMouseEvent e) {
-    List<TMarker> newVal = this.getMouseEvtList(e);
+    List<TMarker> newVal = new ArrayList<>(this.getMouseEvtList(e));
     HoveredMarkers<TMarker> oldVal = this.hovered.getValue();
     HoveredMarkers<TMarker> result = new HoveredMarkers<>(e, newVal);
     this.hovered.setValue(result);

@@ -2,6 +2,10 @@ package com.rm.panzoomcanvas.impl.points;
 
 import com.rm.panzoomcanvas.core.FxPoint;
 import com.rm.panzoomcanvas.layers.points.PointMarker;
+import java.util.Arrays;
+import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -9,14 +13,14 @@ import com.rm.panzoomcanvas.layers.points.PointMarker;
  */
 public final class ArrayPointsSource<T> extends BasePointsSource<T> {
 
-  private final PointMarker[] points;
-
+  private final ObservableList<PointMarker<T>> points;
+  
   /**
    *
    * @param point
    */
   public ArrayPointsSource(PointMarker<T> point) {
-    this(new PointMarker[]{point});
+    this(Arrays.asList(point));
   }
 
   /**
@@ -25,29 +29,26 @@ public final class ArrayPointsSource<T> extends BasePointsSource<T> {
    */
   public ArrayPointsSource(PointMarker<T>[] points) {
     super(FxPoint.getSpatialRef(PointMarker.getPoints(points)));
-    this.points = points;
+    this.points = FXCollections.observableArrayList(points);
   }
-
+  
   /**
-   * {@inheritDoc}
-   * <p>
-   * OVERRIDE: </p>
+   *
+   * @param points
+   */
+  public ArrayPointsSource(List<PointMarker<T>> points) {
+    super(FxPoint.getSpatialRef(PointMarker.getPoints(points)));
+    this.points = FXCollections.observableArrayList(points);
+  }
+    
+  /**
+   * 
+   * @return 
    */
   @Override
-  public int getNumPoints() {
-    int result = this.points.length;
-    return result;
+  public ObservableList<PointMarker<T>> pointMarkersProperty() {
+    return this.points;
   }
-
-  /**
-   * {@inheritDoc}
-   * <p>
-   * OVERRIDE: </p>
-   */
-  @Override
-  public PointMarker getFxPoint(int i) {
-    PointMarker result = this.points[i];
-    return result;
-  }
+  
 
 }

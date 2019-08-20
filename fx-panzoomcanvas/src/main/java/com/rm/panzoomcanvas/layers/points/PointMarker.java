@@ -4,6 +4,7 @@ import com.rm.panzoomcanvas.core.FxEnvelope;
 import com.rm.panzoomcanvas.core.FxPoint;
 import com.rm.panzoomcanvas.layers.Marker;
 import com.vividsolutions.jts.geom.Geometry;
+import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -41,6 +42,22 @@ public final class PointMarker<T> implements Marker<T> {
     FxPoint[] result = new FxPoint[pointMarkers.length];
     for (int i = 0; i < pointMarkers.length; i++) {
       result[i] = pointMarkers[i].getPoint();
+    }
+    return result;
+  }
+  
+  /**
+   *
+   * @param <T>
+   * @param pointMarkers
+   * @return
+   */
+  public static <T> FxPoint[] getPoints(List<PointMarker<T>> pointMarkers) {
+    FxPoint[] result = new FxPoint[pointMarkers.size()];
+    int i = -1 ;
+    for (PointMarker<T> pointMarker : pointMarkers) {
+      i++;
+      result[i] = pointMarker.getPoint();
     }
     return result;
   }

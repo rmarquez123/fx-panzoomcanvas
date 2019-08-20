@@ -106,7 +106,6 @@ public abstract class BaseLayer implements Layer {
   @Override
   public final void redraw(FxCanvas canvas) {
     if (canvas != null) {
-
       this.clearCanvas(canvas);
       Parent p = canvas.getParent();
       if (p != null) {
@@ -120,7 +119,8 @@ public abstract class BaseLayer implements Layer {
           double height = canvas.getHeight();
           this.layerCanvas = this.createLayerCanvas(width, height);
           canvas.getContent().addLayerCanvas(this.uuid, this.layerCanvas);
-          this.onDraw(new DrawArgs(canvas, this.layerCanvas, areaX, areaY, areaHeight, areaWidth));
+          DrawArgs args = new DrawArgs(canvas, this.layerCanvas, areaX, areaY, areaHeight, areaWidth);
+          this.onDraw(args);
         }
       }
       this.canvas = canvas;
