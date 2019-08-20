@@ -1,6 +1,7 @@
 package com.rm.panzoomcanvas.impl.points;
 
 import com.rm.panzoomcanvas.core.FxPoint;
+import com.rm.panzoomcanvas.core.SpatialRef;
 import com.rm.panzoomcanvas.layers.points.PointMarker;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,15 @@ public final class ArrayPointsSource<T> extends BasePointsSource<T> {
   public ArrayPointsSource(PointMarker<T> point) {
     this(Arrays.asList(point));
   }
+  
+  /**
+   *
+   * @param point
+   */
+  public ArrayPointsSource(SpatialRef sptialRef) {
+    super(sptialRef);
+    this.points = FXCollections.observableArrayList();
+  }
 
   /**
    *
@@ -39,6 +49,7 @@ public final class ArrayPointsSource<T> extends BasePointsSource<T> {
   public ArrayPointsSource(List<PointMarker<T>> points) {
     super(FxPoint.getSpatialRef(PointMarker.getPoints(points)));
     this.points = FXCollections.observableArrayList(points);
+    
   }
     
   /**

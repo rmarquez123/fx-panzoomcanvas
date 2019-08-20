@@ -8,6 +8,7 @@ import com.rm.panzoomcanvas.layers.points.PointMarker;
 import com.rm.panzoomcanvas.layers.points.PointsSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -17,13 +18,15 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
 
   private final SpatialRef spatialRef;
   private double buffer = 5.0;
-  
+
   /**
    *
    * @param spatialRef
    */
   protected BasePointsSource(SpatialRef spatialRef) {
+    Objects.requireNonNull(spatialRef, "Spatail reference cannot be null");
     this.spatialRef = spatialRef;
+
   }
 
   /**
@@ -39,7 +42,6 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
     return spatialRef;
   }
 
-  
   /**
    * {@inheritDoc}
    * <p>
@@ -52,7 +54,7 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
     for (PointMarker<T> marker : copy) {
       FxPoint currPoint = marker.getPoint();
       ScreenPoint markerScreenPt = args.projector.projectGeoToScreen(currPoint, args.screenEnv);
-      boolean pointsIntersect = args.screenPoint.intesects(markerScreenPt, 5); 
+      boolean pointsIntersect = args.screenPoint.intesects(markerScreenPt, 5);
       if (pointsIntersect) {
         result = true;
         break;

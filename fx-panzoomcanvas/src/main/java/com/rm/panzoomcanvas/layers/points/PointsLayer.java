@@ -64,6 +64,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
     this.source.pointMarkersProperty().addListener((ListChangeListener.Change<? extends PointMarker<T>> change)->{
       if (change.next()) {
         this.setEnvelopeAndCenter();
+        super.repaint();
       }
     });
   }

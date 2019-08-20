@@ -137,8 +137,10 @@ public class FxCanvas extends Canvas {
    */
   public void zoomToLayer(GeometricLayer geometricLayer) {
     FxPoint value = geometricLayer.centerProperty().getValue();
-    int levelInt = this.level.getValue().getValue();
-    this.zoomToVirtualPoint(levelInt, value);
+    if (value != null) {
+      int levelInt = this.level.getValue().getValue();
+      this.zoomToVirtualPoint(levelInt, value);
+    }
   }
 
   /**
@@ -268,7 +270,7 @@ public class FxCanvas extends Canvas {
     ((StackPane) this.getParent()).getChildren().add(layerCanvas);
     StackPane.setAlignment(layerCanvas, Pos.TOP_LEFT);
     StackPane pane = this.mapToolsPaneProperty.getValue();
-    if (pane != null) {
+    if (pane != null && pane.getParent() != null) {
       pane.toFront();
     }
   }

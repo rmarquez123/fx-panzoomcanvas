@@ -25,6 +25,7 @@ public class FxPoint {
    * @param sr
    */
   public FxPoint(double x, double y, SpatialRef sr) {
+    Objects.requireNonNull(sr, "spatial reference cannot be null"); 
     this.x = x;
     this.y = y;
     this.sr = sr;
