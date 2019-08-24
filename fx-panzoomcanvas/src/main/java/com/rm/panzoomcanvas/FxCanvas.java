@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
@@ -41,7 +42,8 @@ public class FxCanvas extends Canvas {
   private final Property<ScreenPoint> center = new SimpleObjectProperty<>(INITIAL_SCREEN_POINT);
   private final Projector projector;
   private final BooleanProperty scrolling = new SimpleBooleanProperty(false);
-  private Property<StackPane> mapToolsPaneProperty = new SimpleObjectProperty<>();
+  private final Property<StackPane> mapToolsPaneProperty = new SimpleObjectProperty<>();
+  private final Property<Cursor> toolCursor = new SimpleObjectProperty<>();
 
   /**
    *
@@ -69,13 +71,12 @@ public class FxCanvas extends Canvas {
     MapBindings.bindPanning(this);
     this.content.setVirtualCanvas(this);
     this.setToolsPane();
-
-  }
-
-  private void onParentPropertyChanged() {
-    Platform.runLater(() -> {
-      this.addMouseListeners();
-      this.setInitialCenter();
+    this.toolCursor.addListener((obs, old, change) -> {
+      if (change != null) {
+        this.getParent().setCursor(change);
+      } else {
+        this.getParent().setCursor(Cursor.DEFAULT);
+      }
     });
   }
 
@@ -85,6 +86,14 @@ public class FxCanvas extends Canvas {
    */
   public final ScreenPoint getCenterOfScreenPoint() {
     return new ScreenPoint(0.5 * this.getWidth(), 0.5 * this.getHeight());
+  }
+
+  public void setToolCursor(Cursor cursor) {
+    this.toolCursor.setValue(cursor);
+  }
+
+  public ReadOnlyProperty<Cursor> toolCursor() {
+    return toolCursor;
   }
 
   /**
@@ -197,6 +206,68 @@ public class FxCanvas extends Canvas {
     return projector;
   }
 
+  /**
+   *
+   * @param marker
+   * @return
+   */
+  public boolean isInView(Marker<?> marker) {
+    FxEnvelope geometry = marker.getFxEnvelope();
+    ScreenEnvelope value = this.screenEnvelopeProperty.getValue();
+    ScreenEnvelope markerScreenEnv = this.projector.projectGeoToScreen(geometry, value);
+    boolean result = value.contains(markerScreenEnv);
+    return result;
+  }
+
+  /**
+   *
+   * @param mapToolNode
+   */
+  public void addTool(Node mapToolNode) {
+    if (this.mapToolsPaneProperty.getValue() != null) {
+      this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
+    } else {
+      this.mapToolsPaneProperty.addListener((obs, old, change) -> {
+        this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
+      });
+    }
+  }
+
+  /**
+   *
+   * @param layerCanvas
+   */
+  void addLayerCanvas(Node layerCanvas) {
+    ((StackPane) this.getParent()).getChildren().add(layerCanvas);
+    StackPane.setAlignment(layerCanvas, Pos.TOP_LEFT);
+    StackPane pane = this.mapToolsPaneProperty.getValue();
+    if (pane != null && pane.getParent() != null) {
+      pane.toFront();
+    }
+  }
+
+  /**
+   *
+   * @param layerCanvas
+   */
+  void removeLayerCanvas(Node layerCanvas) {
+    Parent p = this.getParent();
+    if (p != null) {
+      ObservableList<Node> children = ((StackPane) p).getChildren();
+      try {
+        children.remove(layerCanvas);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+
+    }
+  }
+
+  /**
+   *
+   * @param newLevel
+   * @param oldLevel
+   */
   private void updateCenterAfterLevelChanged(Level newLevel, Level oldLevel) {
     ScreenPoint refPoint;
     ScrollInvoker invoker = newLevel.getInvoker();
@@ -264,49 +335,6 @@ public class FxCanvas extends Canvas {
 
   /**
    *
-   * @param layerCanvas
-   */
-  void addLayerCanvas(Node layerCanvas) {
-    ((StackPane) this.getParent()).getChildren().add(layerCanvas);
-    StackPane.setAlignment(layerCanvas, Pos.TOP_LEFT);
-    StackPane pane = this.mapToolsPaneProperty.getValue();
-    if (pane != null && pane.getParent() != null) {
-      pane.toFront();
-    }
-  }
-
-  /**
-   *
-   * @param layerCanvas
-   */
-  void removeLayerCanvas(Node layerCanvas) {
-    Parent p = this.getParent();
-    if (p != null) {
-      ObservableList<Node> children = ((StackPane) p).getChildren();
-      try {
-        children.remove(layerCanvas);
-      } catch (Exception ex) {
-        throw new RuntimeException(ex);
-      }
-
-    }
-  }
-
-  /**
-   *
-   * @param marker
-   * @return
-   */
-  public boolean isInView(Marker<?> marker) {
-    FxEnvelope geometry = marker.getFxEnvelope();
-    ScreenEnvelope value = this.screenEnvelopeProperty.getValue();
-    ScreenEnvelope markerScreenEnv = this.projector.projectGeoToScreen(geometry, value);
-    boolean result = value.contains(markerScreenEnv);
-    return result;
-  }
-
-  /**
-   *
    * @param mapToolsPane
    */
   private void setToolsPane() {
@@ -335,16 +363,19 @@ public class FxCanvas extends Canvas {
 
   /**
    *
-   * @param mapToolNode
    */
-  public void addTool(Node mapToolNode) {
-    if (this.mapToolsPaneProperty.getValue() != null) {
-      this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
-    } else {
-      this.mapToolsPaneProperty.addListener((obs, old, change) -> {
-        this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
+  private void onParentPropertyChanged() {
+    Platform.runLater(() -> {
+      this.addMouseListeners();
+      this.setInitialCenter();
+      this.getParent().cursorProperty().addListener((obs, old, change) -> {
+        Platform.runLater(() -> {
+          if (change == Cursor.DEFAULT && this.toolCursor.getValue() != null) {
+            this.getParent().setCursor(this.toolCursor.getValue());
+          }
+        });
       });
-    }
+    });
   }
 
 }
