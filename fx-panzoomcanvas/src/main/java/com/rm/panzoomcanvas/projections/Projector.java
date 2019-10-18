@@ -317,6 +317,28 @@ public class Projector {
     return result;
   }
 
+  /**
+   * 
+   * @param screenEnv
+   * @param points
+   * @return 
+   */
+  public double[][] projectGeoToScreen(ScreenEnvelope screenEnv, SpatialRef sr, double[][] points) {
+    double[][] result = new double[points.length][2]; 
+    for (int i = 0; i < points.length; i++) {
+      ScreenPoint a = projectGeoToScreen(new FxPoint(points[i][0], points[i][1], sr), screenEnv);
+      result[i] = new double[]{a.getX(), a.getY()};
+    }
+    return result;
+  }
+  
+
+  /**
+   * 
+   * @param screenEnv
+   * @param points
+   * @return 
+   */
   public double[][] projectGeoToScreen(ScreenEnvelope screenEnv, double[][] points) {
     double[][] virtual = this.projectGeoToVirtual(this.baseSpatialRef, points);
     double[][] result = this.projectVirtualToScreen(virtual, screenEnv);

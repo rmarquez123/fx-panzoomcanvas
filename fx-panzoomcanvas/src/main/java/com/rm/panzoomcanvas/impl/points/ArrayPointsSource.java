@@ -59,7 +59,17 @@ public final class ArrayPointsSource<T> extends BasePointsSource<T> {
   @Override
   public ObservableList<PointMarker<T>> pointMarkersProperty() {
     return this.points;
+  } 
+  
+  
+  /**
+   * 
+   * @param needle
+   * @return 
+   */
+  @Override
+  public boolean contains(PointMarker<T> needle) {
+    return this.points.contains(needle); 
   }
   
-
 }

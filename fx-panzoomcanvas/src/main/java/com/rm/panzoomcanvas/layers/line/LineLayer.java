@@ -3,13 +3,13 @@ package com.rm.panzoomcanvas.layers.line;
 import com.rm.panzoomcanvas.FxCanvas;
 import com.rm.panzoomcanvas.LayerMouseEvent;
 import com.rm.panzoomcanvas.core.FxPoint;
-import com.rm.panzoomcanvas.layers.BaseLayer;
-import com.rm.panzoomcanvas.layers.DrawArgs;
 import com.rm.panzoomcanvas.core.ScreenEnvelope;
 import com.rm.panzoomcanvas.core.ScreenPoint;
 import com.rm.panzoomcanvas.core.SpatialRef;
 import com.rm.panzoomcanvas.core.VirtualEnvelope;
 import com.rm.panzoomcanvas.core.VirtualPoint;
+import com.rm.panzoomcanvas.layers.BaseLayer;
+import com.rm.panzoomcanvas.layers.DrawArgs;
 import com.rm.panzoomcanvas.layers.HoveredMarkers;
 import com.rm.panzoomcanvas.layers.LayerHoverSelect;
 import com.rm.panzoomcanvas.layers.LayerTooltip;
@@ -55,6 +55,16 @@ public class LineLayer<T> extends BaseLayer {
       }
     };
   }
+  
+  /**
+   * 
+   * @return 
+   */
+  public LineLayerSource getSource() {
+    return source;
+  }
+  
+  
 
   /**
    *

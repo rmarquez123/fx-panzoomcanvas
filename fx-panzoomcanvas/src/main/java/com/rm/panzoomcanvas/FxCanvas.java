@@ -10,6 +10,7 @@ import com.rm.panzoomcanvas.core.VirtualEnvelope;
 import com.rm.panzoomcanvas.layers.Marker;
 import com.rm.panzoomcanvas.projections.Projector;
 import java.util.List;
+import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -145,6 +146,7 @@ public class FxCanvas extends Canvas {
    * @param geometricLayer
    */
   public void zoomToLayer(GeometricLayer geometricLayer) {
+    Objects.requireNonNull(geometricLayer); 
     FxPoint value = geometricLayer.centerProperty().getValue();
     if (value != null) {
       int levelInt = this.level.getValue().getValue();

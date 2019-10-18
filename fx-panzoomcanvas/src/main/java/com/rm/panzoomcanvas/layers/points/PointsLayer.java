@@ -21,12 +21,14 @@ import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -61,23 +63,21 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
     this.hoverSelect = new PointLayerHoverSelect(this);
     this.hoverSelect.selected().addListener((obs, oldVal, change) -> this.repaint());
     this.pointsLabelProperty.addListener((obs, old, change) -> this.repaint());
-    this.source.pointMarkersProperty().addListener((ListChangeListener.Change<? extends PointMarker<T>> change)->{
+    this.source.pointMarkersProperty().addListener((ListChangeListener.Change<? extends PointMarker<T>> change) -> {
       if (change.next()) {
-        this.setEnvelopeAndCenter();
+        this.setEnvelopeAndCenter(); 
         super.repaint();
       }
     });
   }
 
-  
   /**
-   * 
-   * @return 
+   *
+   * @return
    */
   public PointsSource<T> getSource() {
     return source;
   }
-  
 
   /**
    *
@@ -136,13 +136,11 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
    * @return
    */
   public PointMarker<T> getMarker(T userObject) {
-    PointMarker<T> result = null;
-    for (PointMarker<T> p : this.source.pointMarkersProperty()) {
-      if (Objects.equals(p.getUserObject(), userObject)) {
-        result = p;
-        break;
-      }
-    }
+    PointMarker<T> result = this.source
+      .pointMarkersProperty().stream()
+      .filter(p -> Objects.equals(p.getUserObject(), userObject))
+      .findFirst()
+      .orElse(null);
     return result;
   }
 
@@ -202,6 +200,9 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
    */
   @Override
   protected void onDraw(DrawArgs args) {
+    if (!this.visibleProperty().get()) {
+      return;
+    }
     Projector projector = args.getCanvas().getProjector();
     ObservableList<PointMarker<T>> copy = this.source.pointMarkersProperty();
     for (PointMarker<T> marker : copy) {
@@ -216,7 +217,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
     List<PointMarker<T>> selected = this.selectedMarkersProperty().getValue();
     if (selected != null) {
       for (PointMarker<T> marker : selected) {
-        if (marker == null) {
+        if (marker == null || !this.source.contains(marker)) {
           continue;
         }
         FxPoint point = marker.getPoint();
@@ -272,7 +273,7 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
   List<PointMarker<T>> getMouseEvtList(LayerMouseEvent e) {
     double eX = e.mouseEvt.getX();
     double eY = e.mouseEvt.getY();
-    
+
     ScreenPoint mouseScnPt = new ScreenPoint(eX, eY);
     ScreenEnvelope screenEnv = e.screenEnv;
     List<PointMarker<T>> result = new ArrayList<>();
@@ -305,4 +306,45 @@ public class PointsLayer<T> extends BaseLayer implements GeometricLayer {
     return this.envelopeProperty.getReadOnlyProperty();
   }
 
+  /**
+   * 8
+   *
+   * @param userObj
+   */
+  public void selectByUserObject(Object userObj) {
+    if (userObj != null) {
+      List<PointMarker<T>> list = this.source.pointMarkersProperty().stream()
+        .filter((m) -> Objects.equals(m.getUserObject(), userObj))
+        .collect(Collectors.toList());
+      if (!list.isEmpty()
+        && (this.selectedMarkersProperty().get() == null || this.isNotSelected(userObj))) {
+        ObservableList<PointMarker<T>> newlist = FXCollections.observableArrayList(list);
+        this.selectedMarkersProperty().setValue(newlist);
+      }
+    } else {
+      ObservableList<PointMarker<T>> newlist = FXCollections.observableArrayList();
+      this.selectedMarkersProperty().setValue(newlist);
+    }
+  }
+
+  /**
+   *
+   * @param userObj
+   * @return
+   */
+  public boolean isSelected(Object userObj) {
+    boolean result = this.selectedMarkersProperty().get().stream()
+      .anyMatch(m -> Objects.equals(m.getUserObject(), userObj));
+    return result;
+  }
+
+  /**
+   *
+   * @param userObj
+   * @return
+   */
+  public boolean isNotSelected(Object userObj) {
+    boolean result = !this.isSelected(userObj);
+    return result;
+  }
 }

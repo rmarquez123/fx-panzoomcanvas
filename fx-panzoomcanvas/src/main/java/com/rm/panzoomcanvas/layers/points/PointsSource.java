@@ -22,4 +22,9 @@ public interface PointsSource<T> extends LayerGeometry {
    * 
    */
   public ObservableList<PointMarker<T>> pointMarkersProperty(); 
+  
+  /**
+   * 
+   */
+  public boolean contains(PointMarker<T> needle); 
 }

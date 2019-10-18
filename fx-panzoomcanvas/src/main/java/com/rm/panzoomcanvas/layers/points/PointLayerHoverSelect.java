@@ -12,6 +12,10 @@ import java.util.List;
  */
 public class PointLayerHoverSelect extends LayerHoverSelect {
 
+  /**
+   * 
+   * @param host 
+   */
   public PointLayerHoverSelect(PointsLayer host) {
     super(host);
   }

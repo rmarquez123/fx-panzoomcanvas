@@ -105,12 +105,15 @@ public class Content {
    *
    */
   private void onLayerListChanged() {
-    if (this.canvas != null) {
-      this.layers.forEach((t) -> {
-        t.redraw(this.canvas);
-      });
-
+    if (this.canvas != null 
+      && this.canvas.getParent() != null
+      && this.canvas.getWidth() > 0) {
+      this.layers.forEach(this::redrawLayer);
     }
+  }
+  
+  private void redrawLayer(Layer layer) {
+    layer.redraw(this.canvas);
   }
 
   /**

@@ -16,6 +16,7 @@ import javafx.scene.Parent;
  * @author rmarquez
  */
 public abstract class BaseLayer implements Layer {
+
   private final String name;
   private final BooleanProperty visibleProperty = new SimpleBooleanProperty(true);
   private final BooleanProperty selectableProperty = new SimpleBooleanProperty(false);
@@ -25,7 +26,6 @@ public abstract class BaseLayer implements Layer {
   private Node layerCanvas = null;
   private FxCanvas canvas;
   private final MouseEventProperties mouseEvtProps = new MouseEventProperties();
-  
 
   /**
    *
@@ -36,7 +36,6 @@ public abstract class BaseLayer implements Layer {
     this.name = name;
     this.geometry = layerGeometry;
   }
-  
 
   /**
    * {@inheritDoc}
@@ -67,7 +66,7 @@ public abstract class BaseLayer implements Layer {
   public final BooleanProperty selectableProperty() {
     return this.selectableProperty;
   }
-  
+
   /**
    * {@inheritDoc}
    * <p>
@@ -163,15 +162,15 @@ public abstract class BaseLayer implements Layer {
   public final LayerGeometry getLayerGeometry() {
     return this.geometry;
   }
-  
+
   /**
-   * 
-   * @return 
+   *
+   * @return
    */
   public MouseEventProperties getMouseEvtProps() {
     return mouseEvtProps;
   }
-  
+
   /**
    * {@inheritDoc}
    * <p>
@@ -179,9 +178,11 @@ public abstract class BaseLayer implements Layer {
    */
   @Override
   public final void onMouseClicked(LayerMouseEvent evt) {
-    this.mouseEvtProps.trigger(MouseEventProperties.MouseEvent.CLICKED, evt); 
+    if (this.visibleProperty.get()) {
+      this.mouseEvtProps.trigger(MouseEventProperties.MouseEvent.CLICKED, evt);
+    }
   }
-  
+
   /**
    * {@inheritDoc}
    * <p>
@@ -191,7 +192,6 @@ public abstract class BaseLayer implements Layer {
   public final void onMouseHovered(LayerMouseEvent event) {
     this.mouseEvtProps.trigger(MouseEventProperties.MouseEvent.HOVERED, event);
   }
-  
 
   /**
    *

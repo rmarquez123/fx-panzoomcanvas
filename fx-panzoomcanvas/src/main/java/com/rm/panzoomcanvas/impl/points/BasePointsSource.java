@@ -9,6 +9,7 @@ import com.rm.panzoomcanvas.layers.points.PointsSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -61,5 +62,17 @@ public abstract class BasePointsSource<T> implements PointsSource<T> {
       }
     }
     return result;
+  }
+
+  @Override
+  public ObservableList<PointMarker<T>> pointMarkersProperty() {
+    //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public boolean contains(PointMarker<T> needle) {
+    //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }
