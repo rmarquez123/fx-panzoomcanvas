@@ -13,9 +13,8 @@ import com.rm.panzoomcanvas.core.VirtualPoint;
 import com.rm.panzoomcanvas.layers.BaseLayer;
 import com.rm.panzoomcanvas.layers.DrawArgs;
 import com.rm.panzoomcanvas.layers.LayerHoverSelect;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -65,20 +64,15 @@ public class PolyLineLayer<T> extends BaseLayer implements GeometricLayer {
    * @throws RuntimeException
    */
   private void setEnvelopeAndCenter() throws RuntimeException {
-    Geometry ref = this.getReferenceGeometryFromSource();
+    Envelope ref = this.getReferenceGeometryFromSource();
     if (ref != null) {
-      Point centroid = ref.getCentroid();
-      if (!centroid.isEmpty()) {
-        SpatialRef spatialRef = this.source.getSpatialRef();
-        Envelope envelope = ref.getEnvelopeInternal();
-        FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(envelope, spatialRef);
-        this.envelopeProperty.setValue(fxEnvelope);
+      Coordinate centroid = ref.centre();
+      SpatialRef spatialRef = this.source.getSpatialRef();
+      FxEnvelope fxEnvelope = FxEnvelope.fromJtsEnvelope(ref, spatialRef);
+      this.envelopeProperty.setValue(fxEnvelope);
 
-        FxPoint center = new FxPoint(centroid.getX(), centroid.getY(), spatialRef);
-        this.centerProperty.setValue(center);
-      } else {
-        throw new RuntimeException("Reference point has an 'empty' centroid.");
-      }
+      FxPoint center = new FxPoint(centroid.x, centroid.y, spatialRef);
+      this.centerProperty.setValue(center);
     } else {
       this.centerProperty.set(null);
       this.envelopeProperty.set(null);
@@ -86,21 +80,21 @@ public class PolyLineLayer<T> extends BaseLayer implements GeometricLayer {
   }
 
   /**
-   * 
-   * @return 
+   *
+   * @return
    */
-  private Geometry getReferenceGeometryFromSource() {
-    Geometry ref = null;
+  private Envelope getReferenceGeometryFromSource() {
+    Envelope result = null;
     ArrayList<PolyLineMarker<T>> copy = new ArrayList<>(this.source.markers());
     for (PolyLineMarker<T> marker : copy) {
-      Geometry point = marker.getJtsGeometry();
-      if (ref == null) {
-        ref = point;
+      Envelope geometry = marker.getJtsGeometry().getEnvelopeInternal();
+      if (result == null) {
+        result = geometry;
       } else {
-        ref = ref.union(point);
+        result.expandToInclude(geometry);
       }
     }
-    return ref;
+    return result;
   }
 
   /**
@@ -265,17 +259,6 @@ public class PolyLineLayer<T> extends BaseLayer implements GeometricLayer {
   @Override
   public ReadOnlyObjectProperty<FxEnvelope> envelopeProperty() {
     return this.envelopeProperty.getReadOnlyProperty();
-  }
-
-  /**
-   *
-   */
-  private void removeInvalidSelected() {
-    List<PolyLineMarker<T>> selectedMarkers = this.selectedProperty().getValue();
-    List<PolyLineMarker<T>> valid = selectedMarkers.stream()
-      .filter(this.source::contains)
-      .collect(Collectors.toList());
-    this.selectedProperty().setValue(FXCollections.observableArrayList(valid));
   }
 
   /**

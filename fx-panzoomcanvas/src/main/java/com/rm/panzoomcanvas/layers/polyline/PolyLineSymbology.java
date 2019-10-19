@@ -85,8 +85,8 @@ public class PolyLineSymbology {
       xArray[i] = projected[i][0];
       yArray[i] = projected[i][1];
     }
-    g.setFill(Color.CADETBLUE);
-    g.setStroke(Color.CADETBLUE);
+    g.setFill(Color.web("00ddff"));
+    g.setStroke(Color.web("00ddff"));
     g.setLineWidth(widthProperty.getValue());
     g.strokePolyline(xArray, yArray, m.numPoints);
   }
