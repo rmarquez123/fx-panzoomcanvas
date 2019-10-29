@@ -192,6 +192,4 @@ public class Content {
       layer.onMouseHovered(layerMouseEvent);
     }
   }
-  
-
 }

@@ -165,8 +165,8 @@ public class PolyLineLayer<T> extends BaseLayer implements GeometricLayer {
     List<PolyLineMarker> result = new ArrayList<>();
     for (PolyLineMarker marker : this.source.markers()) {
       FxPoint geoPnt = e.projector.projectVirtualToGeo(virtualPt.asPoint(), marker.getSpatialRef());
-      ScreenEnvelope screenbuff = new ScreenEnvelope(new ScreenPoint(0, 0), new ScreenPoint(5, 5),
-        screenEnv.getLevel(), mouseScnPt);
+      ScreenEnvelope screenbuff = new ScreenEnvelope(
+        new ScreenPoint(0, 0), new ScreenPoint(10, 10), screenEnv.getLevel(), mouseScnPt);
       VirtualEnvelope virtualBuff = e.projector.projectScreenToVirtual(screenbuff);
       FxEnvelope geobuff = e.projector.projectVirtualToGeo(virtualBuff, marker.getSpatialRef());
       Double width = geobuff.getWidth();

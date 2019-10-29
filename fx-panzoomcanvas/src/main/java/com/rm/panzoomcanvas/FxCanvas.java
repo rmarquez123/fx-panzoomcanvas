@@ -225,7 +225,7 @@ public class FxCanvas extends Canvas {
    *
    * @param mapToolNode
    */
-  public void addTool(Node mapToolNode) {
+  public synchronized void addTool(Node mapToolNode) {
     if (this.mapToolsPaneProperty.getValue() != null) {
       this.mapToolsPaneProperty.getValue().getChildren().add(mapToolNode);
     } else {
@@ -239,7 +239,7 @@ public class FxCanvas extends Canvas {
    *
    * @param layerCanvas
    */
-  void addLayerCanvas(Node layerCanvas) {
+  synchronized void addLayerCanvas(Node layerCanvas) {
     ((StackPane) this.getParent()).getChildren().add(layerCanvas);
     StackPane.setAlignment(layerCanvas, Pos.TOP_LEFT);
     StackPane pane = this.mapToolsPaneProperty.getValue();
@@ -252,7 +252,7 @@ public class FxCanvas extends Canvas {
    *
    * @param layerCanvas
    */
-  void removeLayerCanvas(Node layerCanvas) {
+  synchronized void removeLayerCanvas(Node layerCanvas) {
     Parent p = this.getParent();
     if (p != null) {
       ObservableList<Node> children = ((StackPane) p).getChildren();

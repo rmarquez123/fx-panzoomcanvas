@@ -190,7 +190,8 @@ public class Projector {
   public FxEnvelope projectVirtualToGeo(VirtualEnvelope virtualEnv, SpatialRef destSr) {
     FxPoint min = this.projectVirtualToGeo(virtualEnv.getMin(), destSr);
     FxPoint max = this.projectVirtualToGeo(virtualEnv.getMax(), destSr);
-    return new FxEnvelope(min, max);
+    FxEnvelope result = new FxEnvelope(min, max);
+    return result;
   }
 
   /**
