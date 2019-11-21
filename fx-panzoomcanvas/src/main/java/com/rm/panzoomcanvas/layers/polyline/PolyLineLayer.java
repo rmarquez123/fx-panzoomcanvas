@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -58,7 +59,15 @@ public class PolyLineLayer<T> extends BaseLayer implements GeometricLayer {
       }
     });
   }
-
+  
+  /**
+   * 
+   * @return 
+   */
+  public BooleanProperty deSelectOnClickProperty() {
+    return this.hoverSelect.deSelectOnClickProperty();
+  }
+  
   /**
    *
    * @throws RuntimeException
@@ -214,12 +223,10 @@ public class PolyLineLayer<T> extends BaseLayer implements GeometricLayer {
         ObservableList<PolyLineMarker<T>> newlist = FXCollections.observableArrayList(list);
         this.selectedProperty().setValue(newlist);
       }
-
     } else {
       ObservableList<PolyLineMarker<T>> newlist = FXCollections.observableArrayList();
       this.selectedProperty().setValue(newlist);
     }
-
   }
 
   /**

@@ -124,5 +124,35 @@ public class FxEnvelope {
     VirtualEnvelope result = new VirtualEnvelope(newMin, newMax);
     return result;
   }
+  
+  /**
+   * 
+   * @param other
+   * @return 
+   */
+  public FxEnvelope expandToInclude(FxEnvelope other) {
+    Objects.requireNonNull(other); 
+    if (!other.getSr().equals(this.getSr())) {
+      throw new IllegalArgumentException("Spatial references must be equal"); 
+    }
+    Envelope thisEnv = this.toJtsEnvelope(); 
+    Envelope otherEnv = this.toJtsEnvelope();
+    thisEnv.expandToInclude(otherEnv);
+    FxEnvelope result = FxEnvelope.fromJtsEnvelope(thisEnv, this.sr);
+    return result;
+  }
+  
+  
+  /**
+   * 
+   * @return 
+   */
+  public Envelope toJtsEnvelope() {
+    double y2 = this.getMax().getY(); 
+    double y1 = this.getMin().getY(); 
+    double x1 = this.getMin().getX(); 
+    double x2 = this.getMax().getX(); 
+    return new Envelope(x1, x2, y1, y2); 
+  }
 
 }

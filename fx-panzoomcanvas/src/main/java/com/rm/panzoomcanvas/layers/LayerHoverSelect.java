@@ -8,6 +8,7 @@ import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -25,19 +26,20 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
   private final Property<HoveredMarkers<TMarker>> hovered = new SimpleObjectProperty<>();
   private final LayerCursorHelper<TObj> cursorHelper;
   public final BaseLayer host;
-  
+  private final BooleanProperty deSelectOnClickProperty = new SimpleBooleanProperty(true);
+
   /**
-   * 
-   * @param host 
+   *
+   * @param host
    */
   public LayerHoverSelect(BaseLayer host) {
     this.host = host;
     this.cursorHelper = new LayerCursorHelper<>(this);
     this.initMouseEvents();
   }
-  
+
   /**
-   * 
+   *
    */
   private void initMouseEvents() {
     MouseEventProperties.MouseEvent HOVERED = MouseEventProperties.MouseEvent.HOVERED;
@@ -49,11 +51,11 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
       this.onMouseClicked(event);
     });
   }
-    
+
   public BooleanProperty selectableProperty() {
     return this.host.selectableProperty();
   }
-  
+
   public ListProperty<TMarker> selected() {
     return selected;
   }
@@ -61,10 +63,10 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
   public Property<HoveredMarkers<TMarker>> hovered() {
     return hovered;
   }
-  
+
   /**
-   * 
-   * @return 
+   *
+   * @return
    */
   public Node getNode() {
     return this.host.getLayerCanvas();
@@ -77,8 +79,18 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
    */
   public void onMouseClicked(LayerMouseEvent e) {
     List<TMarker> newVal = new ArrayList<>(this.getMouseEvtList(e));
-    newVal.removeIf((TMarker t) -> selected.contains(t)); 
+    if (deSelectOnClick()) {
+      newVal.removeIf((TMarker t) -> selected.contains(t));
+    }
     this.selected.setValue(FXCollections.observableArrayList(newVal));
+  }
+
+  /**
+   *
+   * @return
+   */
+  public boolean deSelectOnClick() {
+    return deSelectOnClickProperty.get();
   }
 
   /**
@@ -129,5 +141,13 @@ public abstract class LayerHoverSelect<TMarker extends Marker<TObj>, TObj> {
    * @return
    */
   protected abstract List<TMarker> getMouseEvtList(LayerMouseEvent e);
+  
+  /**
+   * 
+   * @return 
+   */
+  public BooleanProperty deSelectOnClickProperty() {
+    return this.deSelectOnClickProperty;
+  }
 
 }
