@@ -105,6 +105,20 @@ public class FxPoint {
     }
     return this.jtsPoint;
   }
+  
+  /**
+   * 
+   * @param dx
+   * @param dy
+   * @return 
+   */
+  public FxPoint add(double dx, double dy) {
+    double newx = this.x + dx;
+    double newy = this.y + dy;
+    FxPoint fxPoint = new FxPoint(newx, newy, this.sr);
+    return fxPoint; 
+  }
+  
 
   /**
    * {@inheritDoc}
@@ -115,5 +129,41 @@ public class FxPoint {
   public String toString() {
     return "FxPoint{" + "x=" + x + ", y=" + y + ", sr=" + sr.getSrid() + '}';
   }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 37 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+    hash = 37 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+    hash = 37 * hash + Objects.hashCode(this.sr);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final FxPoint other = (FxPoint) obj;
+    if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
+      return false;
+    }
+    if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y)) {
+      return false;
+    }
+    if (!Objects.equals(this.sr, other.sr)) {
+      return false;
+    }
+    return true;
+  }
+  
+  
+  
 
 }

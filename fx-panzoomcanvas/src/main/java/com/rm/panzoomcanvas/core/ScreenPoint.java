@@ -78,7 +78,8 @@ public class ScreenPoint {
     GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING));
     Point thisJtsPoint = factory.createPoint(new Coordinate(this.x, this.y));
     Point otherJtsPoint = factory.createPoint(new Coordinate(other.x, other.y));
-    return thisJtsPoint.buffer(buffer).intersects(otherJtsPoint.buffer(buffer));
+    boolean result = thisJtsPoint.buffer(buffer).intersects(otherJtsPoint.buffer(buffer));
+    return result;
   }
   /**
    *
