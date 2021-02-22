@@ -46,7 +46,7 @@ public class VectorPointSymbology implements PointSymbology {
   @Override
   public void apply(PointsLayer<?> layer, PointMarker<?> marker, DrawArgs args, ScreenPoint screenPoint) {
     GraphicsContext g = ((Canvas) args.getLayerCanvas()).getGraphicsContext2D();
-
+    
     double x1 = screenPoint.getX();
     double y1 = screenPoint.getY();
     Object userObject = marker.getUserObject();
@@ -62,8 +62,8 @@ public class VectorPointSymbology implements PointSymbology {
     g.setStroke(this.colorProperty.getValue());
     g.strokeLine(x1, y1, s.getX(), s.getY());
 
-    double h = 12;
-    double b = 8;
+    double h = 8;
+    double b = 0.75*h;
     Point p1 = new Point(0.5 * b, -0.5 * h);
     Point p2 = new Point(-0.5 * b, -0.5 * h);
     Point p3 = new Point(0.0, 0.5 * h);
@@ -72,8 +72,10 @@ public class VectorPointSymbology implements PointSymbology {
     p2 = p2.rotate(theta).add(new Point(s.getX(), s.getY()));
     p3 = p3.rotate(theta).add(new Point(s.getX(), s.getY()));
     PointArrays arr = Point.toArrays(p1, p2, p3, p1);
+    
     g.setFill(this.colorProperty.getValue());
     g.fillPolygon(arr.xarray, arr.yarray, arr.length);
+    
   }
 
   /**
