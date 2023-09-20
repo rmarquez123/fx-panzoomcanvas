@@ -1,7 +1,7 @@
 package com.rm.panzoomcanvas.layers.polygon;
 
 import com.rm.panzoomcanvas.core.FxEnvelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  *

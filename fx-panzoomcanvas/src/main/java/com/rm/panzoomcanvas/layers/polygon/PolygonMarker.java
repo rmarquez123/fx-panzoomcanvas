@@ -2,7 +2,7 @@ package com.rm.panzoomcanvas.layers.polygon;
 
 import com.rm.panzoomcanvas.core.FxEnvelope;
 import com.rm.panzoomcanvas.layers.Marker;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

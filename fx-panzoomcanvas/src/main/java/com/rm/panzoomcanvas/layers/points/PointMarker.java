@@ -3,7 +3,7 @@ package com.rm.panzoomcanvas.layers.points;
 import com.rm.panzoomcanvas.core.FxEnvelope;
 import com.rm.panzoomcanvas.core.FxPoint;
 import com.rm.panzoomcanvas.layers.Marker;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import java.util.List;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;

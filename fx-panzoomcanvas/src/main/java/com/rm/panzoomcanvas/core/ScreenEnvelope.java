@@ -1,6 +1,6 @@
 package com.rm.panzoomcanvas.core;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  *

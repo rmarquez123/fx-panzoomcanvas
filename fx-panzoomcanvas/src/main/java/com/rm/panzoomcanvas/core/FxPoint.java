@@ -1,9 +1,9 @@
 package com.rm.panzoomcanvas.core;
 
-import com.vividsolutions.jts.geom.Geometry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  *

@@ -6,7 +6,7 @@ import com.rm.panzoomcanvas.core.SpatialRef;
 import com.rm.panzoomcanvas.core.SpatialUtils;
 import com.rm.panzoomcanvas.layers.polygon.PolygonMarker;
 import com.rm.panzoomcanvas.layers.polygon.PolygonSource;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  *
