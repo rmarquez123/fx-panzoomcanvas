@@ -27,6 +27,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 /**
@@ -146,7 +147,7 @@ public class FxCanvas extends Canvas {
    * @param geometricLayer
    */
   public void zoomToLayer(GeometricLayer geometricLayer) {
-    Objects.requireNonNull(geometricLayer); 
+    Objects.requireNonNull(geometricLayer);
     FxPoint value = geometricLayer.centerProperty().getValue();
     if (value != null) {
       int levelInt = this.level.getValue().getValue();
@@ -378,6 +379,35 @@ public class FxCanvas extends Canvas {
         });
       });
     });
+  }
+  
+  /**
+   * 
+   */
+  public void bindSize() {
+    StackPane stackpane = (StackPane) this.getParent();
+    stackpane.parentProperty().addListener((a, b, c) -> {
+      bindSize(stackpane, c);
+    });
+    this.bindSize(stackpane, stackpane.getParent());
+  }
+  
+  /***
+   * 
+   * @param stackpane
+   * @param c 
+   */
+  private void bindSize(StackPane stackpane, Parent c) {
+    stackpane.minWidthProperty().unbind();
+    stackpane.prefWidthProperty().unbind();
+    stackpane.minHeightProperty().unbind();
+    stackpane.prefHeightProperty().unbind();
+    if (c != null) {
+      stackpane.minWidthProperty().bind(((Pane) c).widthProperty());
+      stackpane.prefWidthProperty().bind(((Pane) c).widthProperty());
+      stackpane.minHeightProperty().bind(((Pane) c).heightProperty());
+      stackpane.prefHeightProperty().bind(((Pane) c).heightProperty());
+    }
   }
 
 }
